@@ -169,3 +169,249 @@ public class EnemyGun : MonoBehaviour
     }
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+****** Space Invader Level two ********
+
+Fight with the Boss SpaceShip 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//Enemy code 
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Enemy : MonoBehaviour
+{
+    public Rigidbody2D enemy; //reference to itself
+    public float moveSpeed = 20.0f; //default move speed of the enemy
+    public bool changeDirection = false; //by default set the bool to false
+                                         // Use this for initialization
+    void Start()
+    {
+        enemy = this.gameObject.GetComponent<Rigidbody2D>(); //make the connection to the reference
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        moveEnemy();
+    }
+    public void moveEnemy()
+    {
+
+        if (changeDirection == true)
+        {
+            enemy.velocity = new Vector2(1, 0) * -1 * moveSpeed; //get the enemy to move left
+        }
+        else if (changeDirection == false)
+        {
+            enemy.velocity = new Vector2(1, 0) * moveSpeed; //get the enemy to move right
+        }
+    }
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.name == "RightWall")
+        {
+            Debug.Log("Hit the right wall");
+            changeDirection = true;
+        }
+        if (col.gameObject.name == "LeftWall")
+        {
+            Debug.Log("Hit the left wall");
+            changeDirection = false;
+        }
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//Enemy Bullets
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyProjectile : MonoBehaviour
+{
+    public Rigidbody2D projectile;
+    public float moveSpeed = 15.0f;
+ // Use this for initialization
+    void Start()
+    {
+        projectile = this.gameObject.GetComponent<Rigidbody2D>();
+    }
+
+  // Update is called once per frame
+    void Update()
+    {
+        projectile.velocity = new Vector2(0, -1) * moveSpeed;
+    }
+
+  //hit detection
+    
+   void OnCollisionEnter2D(Collision2D col)
+    {
+   //when it hits the player
+        if (col.gameObject.tag == "Player")
+        {
+            col.gameObject.SetActive(false);
+        }
+   //when it hits the bottom of the screen
+        if (col.gameObject.name == "Bottom")
+        {
+            Object.Destroy(this.gameObject);
+        }
+    }
+}
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Enemy Shoot
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyShoot : MonoBehaviour
+{
+    public GameObject projectile; //reference to the gameobject the enemy will shoot
+    public Transform projectileSpawn; //reference to where the projectile will spawn...
+    public float nextFire = 1.0f;
+    public float currentTime = 0.0f;
+    // Use this for initialization
+    void Start()
+    {
+        projectileSpawn = this.gameObject.transform;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        enemyShoot();
+    }
+    public void enemyShoot()
+    {
+        currentTime += Time.deltaTime;
+        if (currentTime > nextFire)
+        {
+            nextFire += currentTime;
+            Instantiate(projectile, projectileSpawn.position, Quaternion.identity); //FIRE!
+            nextFire -= currentTime;
+            currentTime = 0.0f;
+        }
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Player code
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Player : MonoBehaviour
+{
+    //controls how fast the player moves
+    public float moveSpeed = 10.0f; //default speed, can change if you want.
+    public Rigidbody2D player;
+    // Use this for initialization
+    void Start()
+    {
+        player = this.GetComponent<Rigidbody2D>();
+    }
+
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        //this.transform.Translate(Input.GetAxis("Horizontal"),0,0); //using transform ignores physics part 
+
+        MovePlayer();
+
+    }
+    //this function allows for the player to move
+
+    public void MovePlayer()
+    {
+        //movement through physics. 
+
+        player.velocity = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")) * moveSpeed;
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Player bullets
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class MoveProjectile : MonoBehaviour
+{
+    public Rigidbody2D projectile;//reference to a rigidbody2d
+    public float moveSpeed = 10.0f;
+    // Use this for initialization
+    void Start()
+    {
+        projectile = this.gameObject.GetComponent<Rigidbody2D>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        projectile.velocity = new Vector2(0, 1) * moveSpeed;
+    }
+    //add some hit detecion
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        //when it hits an enemy...
+        if (col.gameObject.name == "Enemy")
+        {
+            col.gameObject.SetActive(false);
+        }
+        //when it hits the top of the screen
+        if (col.gameObject.name == "Top")
+        {
+            Object.Destroy(this.gameObject);
+        }
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Fire code 
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Shoot : MonoBehaviour
+{
+    public GameObject projectile; //reference to the Capsule aka PlayerProjectile
+
+    public Transform projectileSpawn; //reference to where the projectile will spawn from...
+
+    public float nextFire = 1.0f; //time interval between shots
+    public float currentTime = 0.0f; //current time to build up
+
+    // Use this for initialization
+    void Start()
+    {
+        projectileSpawn = this.gameObject.transform; //make link to where this game object is
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+        shoot(); //Shoot
+    }
+
+    //this function allows for projectiles to shoot up aka forward of the ship
+    public void shoot()
+    {
+        currentTime += Time.deltaTime; //build the timer up for current time
+        if (Input.GetButton("Fire1") && currentTime > nextFire) //if player hits Fire and Current time is greater then the interval between...
+        {
+            nextFire += currentTime; //add the current time to next fire, so you cant shoot again
+
+            Instantiate(projectile, projectileSpawn.position, Quaternion.identity); //shoot!!!
+
+            nextFire -= currentTime; //subtract the current time from next fire, so we can "reset" interval to 1
+            currentTime = 0.0f; //reset current time
+        }
+    }
+}
