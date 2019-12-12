@@ -1,4 +1,4 @@
-# SpaceInvader_Project
+# SpaceInvader_Project ******All Code *********
 ~~~~~~~~~~~~~~~~~~~~// EnemyBullet # code ~~~~~~~~~~~~~~~~~~~~~~~~~
 using System.Collections;
 using System.Collections.Generic;
@@ -414,4 +414,90 @@ public class Shoot : MonoBehaviour
             currentTime = 0.0f; //reset current time
         }
     }
+}
+
+************* Enemy Matrix **************
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyMatrix : MonoBehaviour
+{
+    public GameObject[] row1;
+    public GameObject[] row2;
+
+    public GameObject GameManager;
+
+    int totalEnemies = 0;
+
+    int row1Firing = 3;
+    int row2Firing = 4;
+   
+
+    void Start()
+
+    {
+        totalEnemies = row1.Length + row2.Length;
+
+        InvokeRepeating("Row1Fire", 0f, 3f);
+        InvokeRepeating("Row2Fire", 1f, 3f);
+
+    }
+
+
+
+    public void killedEnemy()
+    {
+        if (totalEnemies <= 0)
+        {
+            GameManager.GetComponent<GameManager>().startspwning();
+            
+
+        }
+        totalEnemies--;
+
+    }
+    void Row1Fire()
+    {
+
+        for (int i = 0; i < row1.Length; i++)
+        {
+            if (i % row1Firing == 0)
+            {
+                GameObject enemy = row1[i];
+                if (enemy != null)
+                    enemy.GetComponentInChildren<EnemyGun>().firebullet();
+            }
+        }
+        row1Firing--;
+        if (row1Firing <= 1)
+        {
+            row1Firing = 3;
+        }
+    }
+
+
+
+    void Row2Fire()
+    {
+        for (int i = 0; i < row2.Length; i++)
+        {
+            if (i % row2Firing == 0)
+            {
+                GameObject enemy = row2[i];
+                if (enemy != null)
+                    enemy.GetComponentInChildren<EnemyGun>().firebullet();
+            }
+        }
+        row2Firing--;
+        if (row2Firing <= 1)
+        {
+            row2Firing = 4;
+        }
+    }
+
+
+
+
+
 }
